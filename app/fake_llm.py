@@ -1,3 +1,19 @@
+# TODO:
+# сейчас это фейковая генерация плана
+# ллм должен заменить эту функцию на реальный вызов OpenRouter.
+# !!!!!!!функция должна возвращать такой же JSON-формат:
+# {
+#   "title": "...",
+#   "duration_weeks": 4,
+#   "weeks": [
+#       {
+#           "week": 1,
+#           "goal": "...",
+#           "topics": [...],
+#           "practice": [...]
+#       }
+#   ]
+# }
 def generate_fake_learning_plan(user_input):
     return {
         "title": f"План обучения: {user_input.goal}",
