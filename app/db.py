@@ -65,3 +65,28 @@ def update_learning_plan_by_id(plan_id: str, update_data: dict):
         .execute()
     )
     return result.data
+
+def upsert_task_progress(progress_data: dict):
+    result = (
+        supabase
+        .table("task_progress")
+        .upsert(
+            progress_data,
+            on_conflict="plan_id,week_number,task_index"
+        )
+        .execute()
+    )
+    return result.data[0]
+
+
+def get_task_progress_by_plan_id(plan_id: str):
+    result = (
+        supabase
+        .table("task_progress")
+        .select("*")
+        .eq("plan_id", plan_id)
+        .order("week_number")
+        .order("task_index")
+        .execute()
+    )
+    return result.data

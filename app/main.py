@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.schemas import CreatePlanRequest, UpdatePlanRequest
+from app.schemas import CreatePlanRequest, UpdatePlanRequest, TaskProgressRequest
 from app.fake_llm import generate_fake_learning_plan
 from app.db import (
     save_learning_plan,
@@ -9,6 +9,8 @@ from app.db import (
     get_learning_plan_by_id,
     delete_learning_plan_by_id,
     update_learning_plan_by_id,
+    upsert_task_progress,
+    get_task_progress_by_plan_id,
 )
 
 app = FastAPI(title="AI Learning Planner API")
@@ -83,7 +85,7 @@ def delete_plan(plan_id: str):
         return {"message": "Plan not found"}
 
     return {"message": "Plan deleted successfully"}
-    
+
 @app.patch("/plans/{plan_id}")
 def update_plan(plan_id: str, request: UpdatePlanRequest):
     update_data = request.model_dump(exclude_none=True)
@@ -100,3 +102,20 @@ def update_plan(plan_id: str, request: UpdatePlanRequest):
         "message": "Plan updated successfully",
         "plan": updated_plan[0],
     }
+
+@app.post("/task-progress")
+def save_task_progress(request: TaskProgressRequest):
+    progress_data = request.model_dump()
+    saved_progress = upsert_task_progress(progress_data)
+
+    return {
+        "message": "Task progress saved successfully",
+        "progress": saved_progress,
+    }
+
+
+@app.get("/plans/{plan_id}/progress")
+def get_plan_progress(plan_id: str):
+    progress = get_task_progress_by_plan_id(plan_id)
+
+    return progress

@@ -18,3 +18,9 @@ class UpdatePlanRequest(BaseModel):
     time_per_week: Optional[int] = None
     preferred_format: Optional[str] = None
     plan_json: Optional[dict] = None
+
+class TaskProgressRequest(BaseModel):
+    plan_id: str
+    week_number: int
+    task_index: int
+    is_completed: bool
