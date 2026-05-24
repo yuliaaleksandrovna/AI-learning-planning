@@ -1,13 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.schemas import CreatePlanRequest
+from app.schemas import CreatePlanRequest, UpdatePlanRequest
 from app.fake_llm import generate_fake_learning_plan
 from app.db import (
     save_learning_plan,
     get_learning_plans,
     get_learning_plan_by_id,
     delete_learning_plan_by_id,
+    update_learning_plan_by_id,
 )
 
 app = FastAPI(title="AI Learning Planner API")
@@ -82,3 +83,20 @@ def delete_plan(plan_id: str):
         return {"message": "Plan not found"}
 
     return {"message": "Plan deleted successfully"}
+    
+@app.patch("/plans/{plan_id}")
+def update_plan(plan_id: str, request: UpdatePlanRequest):
+    update_data = request.model_dump(exclude_none=True)
+
+    if not update_data:
+        return {"message": "No data to update"}
+
+    updated_plan = update_learning_plan_by_id(plan_id, update_data)
+
+    if not updated_plan:
+        return {"message": "Plan not found"}
+
+    return {
+        "message": "Plan updated successfully",
+        "plan": updated_plan[0],
+    }

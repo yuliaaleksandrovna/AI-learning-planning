@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -7,3 +9,12 @@ class CreatePlanRequest(BaseModel):
     duration_weeks: int
     time_per_week: int
     preferred_format: str
+
+
+class UpdatePlanRequest(BaseModel):
+    goal: Optional[str] = None
+    level: Optional[str] = None
+    duration_weeks: Optional[int] = None
+    time_per_week: Optional[int] = None
+    preferred_format: Optional[str] = None
+    plan_json: Optional[dict] = None

@@ -56,3 +56,12 @@ def delete_learning_plan_by_id(plan_id: str):
         .execute()
     )
     return result.data
+def update_learning_plan_by_id(plan_id: str, update_data: dict):
+    result = (
+        supabase
+        .table("learning_plans")
+        .update(update_data)
+        .eq("id", plan_id)
+        .execute()
+    )
+    return result.data
