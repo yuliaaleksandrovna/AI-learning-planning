@@ -47,3 +47,12 @@ def get_learning_plan_by_id(plan_id: str):
         .execute()
     )
     return result.data
+def delete_learning_plan_by_id(plan_id: str):
+    result = (
+        supabase
+        .table("learning_plans")
+        .delete()
+        .eq("id", plan_id)
+        .execute()
+    )
+    return result.data

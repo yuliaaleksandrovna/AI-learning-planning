@@ -1,10 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.schemas import CreatePlanRequest
 from app.fake_llm import generate_fake_learning_plan
-from app.db import save_learning_plan, get_learning_plans, get_learning_plan_by_id
+from app.db import (
+    save_learning_plan,
+    get_learning_plans,
+    get_learning_plan_by_id,
+    delete_learning_plan_by_id,
+)
 
 app = FastAPI(title="AI Learning Planner API")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # для MVP можно так
@@ -12,6 +19,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.get("/")
 def root():
@@ -47,6 +55,8 @@ def list_plans():
         }
         for plan in plans
     ]
+
+
 @app.get("/plans/{plan_id}")
 def get_plan(plan_id: str):
     plan = get_learning_plan_by_id(plan_id)
@@ -62,3 +72,13 @@ def get_plan(plan_id: str):
         "plan_json": plan["plan_json"],
         "created_at": plan["created_at"],
     }
+
+
+@app.delete("/plans/{plan_id}")
+def delete_plan(plan_id: str):
+    deleted_plan = delete_learning_plan_by_id(plan_id)
+
+    if not deleted_plan:
+        return {"message": "Plan not found"}
+
+    return {"message": "Plan deleted successfully"}
