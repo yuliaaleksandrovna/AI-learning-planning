@@ -9,6 +9,7 @@ class CreatePlanRequest(BaseModel):
     duration_weeks: int
     time_per_week: int
     preferred_format: str
+    user_id: Optional[str] = "demo-user"
 
 
 class UpdatePlanRequest(BaseModel):
@@ -18,6 +19,7 @@ class UpdatePlanRequest(BaseModel):
     time_per_week: Optional[int] = None
     preferred_format: Optional[str] = None
     plan_json: Optional[dict] = None
+
 
 class TaskProgressRequest(BaseModel):
     plan_id: str

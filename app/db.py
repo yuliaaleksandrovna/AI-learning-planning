@@ -13,8 +13,10 @@ if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
 
 supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
+
 def save_learning_plan(request, plan_json):
     data = {
+        "user_id": request.user_id,
         "title": plan_json["title"],
         "goal": request.goal,
         "level": request.level,
@@ -28,43 +30,69 @@ def save_learning_plan(request, plan_json):
     return result.data[0]
 
 
-def get_learning_plans():
-    result = (
+def get_learning_plans(user_id: str | None = None):
+    query = (
         supabase
         .table("learning_plans")
         .select("*")
         .order("created_at", desc=True)
-        .execute()
     )
+
+    if user_id:
+        query = query.eq("user_id", user_id)
+
+    result = query.execute()
     return result.data
-def get_learning_plan_by_id(plan_id: str):
-    result = (
+
+
+def get_learning_plan_by_id(plan_id: str, user_id: str | None = None):
+    query = (
         supabase
         .table("learning_plans")
         .select("*")
         .eq("id", plan_id)
-        .single()
-        .execute()
     )
+
+    if user_id:
+        query = query.eq("user_id", user_id)
+
+    result = query.single().execute()
     return result.data
-def delete_learning_plan_by_id(plan_id: str):
-    result = (
+
+
+def delete_learning_plan_by_id(plan_id: str, user_id: str | None = None):
+    query = (
         supabase
         .table("learning_plans")
         .delete()
         .eq("id", plan_id)
-        .execute()
     )
+
+    if user_id:
+        query = query.eq("user_id", user_id)
+
+    result = query.execute()
     return result.data
-def update_learning_plan_by_id(plan_id: str, update_data: dict):
-    result = (
+
+
+def update_learning_plan_by_id(
+    plan_id: str,
+    update_data: dict,
+    user_id: str | None = None,
+):
+    query = (
         supabase
         .table("learning_plans")
         .update(update_data)
         .eq("id", plan_id)
-        .execute()
     )
+
+    if user_id:
+        query = query.eq("user_id", user_id)
+
+    result = query.execute()
     return result.data
+
 
 def upsert_task_progress(progress_data: dict):
     result = (
@@ -72,7 +100,7 @@ def upsert_task_progress(progress_data: dict):
         .table("task_progress")
         .upsert(
             progress_data,
-            on_conflict="plan_id,week_number,task_index"
+            on_conflict="plan_id,week_number,task_index",
         )
         .execute()
     )

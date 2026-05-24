@@ -36,6 +36,7 @@ def create_plan(request: CreatePlanRequest):
 
     return {
         "id": saved_plan["id"],
+        "user_id": saved_plan["user_id"],
         "title": plan_json["title"],
         "duration_weeks": plan_json["duration_weeks"],
         "weeks": plan_json["weeks"],
@@ -44,12 +45,13 @@ def create_plan(request: CreatePlanRequest):
 
 
 @app.get("/plans")
-def list_plans():
-    plans = get_learning_plans()
+def list_plans(user_id: str | None = None):
+    plans = get_learning_plans(user_id=user_id)
 
     return [
         {
             "id": plan["id"],
+            "user_id": plan["user_id"],
             "title": plan["title"],
             "goal": plan["goal"],
             "level": plan["level"],
@@ -61,11 +63,12 @@ def list_plans():
 
 
 @app.get("/plans/{plan_id}")
-def get_plan(plan_id: str):
-    plan = get_learning_plan_by_id(plan_id)
+def get_plan(plan_id: str, user_id: str | None = None):
+    plan = get_learning_plan_by_id(plan_id, user_id=user_id)
 
     return {
         "id": plan["id"],
+        "user_id": plan["user_id"],
         "title": plan["title"],
         "goal": plan["goal"],
         "level": plan["level"],
@@ -77,23 +80,22 @@ def get_plan(plan_id: str):
     }
 
 
-@app.delete("/plans/{plan_id}")
-def delete_plan(plan_id: str):
-    deleted_plan = delete_learning_plan_by_id(plan_id)
-
-    if not deleted_plan:
-        return {"message": "Plan not found"}
-
-    return {"message": "Plan deleted successfully"}
-
 @app.patch("/plans/{plan_id}")
-def update_plan(plan_id: str, request: UpdatePlanRequest):
+def update_plan(
+    plan_id: str,
+    request: UpdatePlanRequest,
+    user_id: str | None = None,
+):
     update_data = request.model_dump(exclude_none=True)
 
     if not update_data:
         return {"message": "No data to update"}
 
-    updated_plan = update_learning_plan_by_id(plan_id, update_data)
+    updated_plan = update_learning_plan_by_id(
+        plan_id,
+        update_data,
+        user_id=user_id,
+    )
 
     if not updated_plan:
         return {"message": "Plan not found"}
@@ -102,6 +104,17 @@ def update_plan(plan_id: str, request: UpdatePlanRequest):
         "message": "Plan updated successfully",
         "plan": updated_plan[0],
     }
+
+
+@app.delete("/plans/{plan_id}")
+def delete_plan(plan_id: str, user_id: str | None = None):
+    deleted_plan = delete_learning_plan_by_id(plan_id, user_id=user_id)
+
+    if not deleted_plan:
+        return {"message": "Plan not found"}
+
+    return {"message": "Plan deleted successfully"}
+
 
 @app.post("/task-progress")
 def save_task_progress(request: TaskProgressRequest):
