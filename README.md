@@ -10,6 +10,7 @@ MVP готов: API, база данных и LLM-интеграция с LM Stu
 
 - **FastAPI** — веб-фреймворк
 - **Supabase** — база данных (PostgreSQL)
+- **LM Studio** — локальный LLM-сервер (модель qwen3-8b)
 - **Python 3.11+**
 
 ## Запуск локально
@@ -37,7 +38,11 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 Выполнить SQL из файла `supabase_schema.sql` в SQL-редакторе Supabase.
 
-### 4. Запустить сервер
+### 4. Запустить LM Studio
+
+Открыть LM Studio, загрузить модель `qwen/qwen3-8b` и запустить локальный сервер на `http://localhost:1234`.
+
+### 5. Запустить сервер
 
 ```bash
 uvicorn app.main:app --reload
