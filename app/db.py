@@ -38,12 +38,15 @@ def get_learning_plans():
     )
     return result.data
 def get_learning_plan_by_id(plan_id: str):
-    result = (
-        supabase
-        .table("learning_plans")
-        .select("*")
-        .eq("id", plan_id)
-        .single()
-        .execute()
-    )
-    return result.data
+    try:
+        result = (
+            supabase
+            .table("learning_plans")
+            .select("*")
+            .eq("id", plan_id)
+            .single()
+            .execute()
+        )
+        return result.data
+    except Exception:
+        return None

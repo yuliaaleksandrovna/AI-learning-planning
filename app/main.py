@@ -1,7 +1,9 @@
-from fastapi import FastAPI
+import json
+import httpx
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from app.schemas import CreatePlanRequest
-from app.fake_llm import generate_fake_learning_plan
+from app.llm import generate_learning_plan
 from app.db import save_learning_plan, get_learning_plans, get_learning_plan_by_id
 
 app = FastAPI(title="AI Learning Planner API")
@@ -20,7 +22,19 @@ def root():
 
 @app.post("/plans")
 def create_plan(request: CreatePlanRequest):
-    plan_json = generate_fake_learning_plan(request)
+    try:
+        plan_json = generate_learning_plan(request)
+    except httpx.ConnectError:
+        raise HTTPException(status_code=503, detail="LM Studio недоступен. Убедитесь что сервер запущен на localhost:1234")
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="LM Studio не ответил вовремя. Попробуйте снова")
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=502, detail=f"Ошибка от LM Studio: {e.response.status_code}")
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=502, detail="Модель вернула некорректный ответ. Попробуйте снова")
+    except ValueError as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
     saved_plan = save_learning_plan(request, plan_json)
 
     return {
@@ -50,6 +64,9 @@ def list_plans():
 @app.get("/plans/{plan_id}")
 def get_plan(plan_id: str):
     plan = get_learning_plan_by_id(plan_id)
+
+    if plan is None:
+        raise HTTPException(status_code=404, detail=f"План {plan_id} не найден")
 
     return {
         "id": plan["id"],
